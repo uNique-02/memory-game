@@ -150,6 +150,7 @@ export default function Memory() {
     setLevel((prev) => prev + 1);
     setCount(newCount);
     fetchCharacters(newCount);
+    setBestScore(Math.max(score, bestScore));
     setScore(0);
     setScoreReset(false);
     setShowCongrats(false);
@@ -250,7 +251,7 @@ export default function Memory() {
               >
                 Score: {score}
               </p>
-              <p>Best Score: {score}</p>
+              <p>Best Score: {bestScore}</p>
             </div>
           </header>
 
