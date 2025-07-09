@@ -1,5 +1,5 @@
 {
-  "name": "trip-to-memory-lane",
+  "name": "client",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -17,8 +17,7 @@
     "react": "^19.1.0",
     "react-confetti": "^6.4.0",
     "react-dom": "^19.1.0",
-    "react-hot-toast": "^2.5.2",
-    "@vitejs/plugin-react": "^4.6.0"
+    "react-hot-toast": "^2.5.2"
   },
   "devDependencies": {
     "@eslint/js": "^9.25.0",
