@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import Confetti from "react-confetti";
 import toast, { Toaster } from "react-hot-toast";
-import axios from "axios";
+import useCharactersStore from "../stores/useCharacterStore";
 
 const initialImages = [
   {
@@ -42,7 +42,7 @@ const initialImages = [
   },
 ];
 
-// Shuffle function
+// Utility: Shuffle array
 function shuffleArray(array) {
   const shuffled = [...array];
   for (let i = shuffled.length - 1; i > 0; i--) {
@@ -55,17 +55,23 @@ function shuffleArray(array) {
 export default function Memory() {
   const [score, setScore] = useState(0);
   const [bestScore, setBestScore] = useState(0);
-  const [images, setImages] = useState(initialImages);
   const [showCongrats, setShowCongrats] = useState(false);
   const [showFail, setShowFail] = useState(false);
-  const [scoreReset, setScoreReset] = useState(false); // for red color effect
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-  const [characters, setCharacters] = useState([]);
-  const [selectedCharacter, setSelectedCharacter] = useState(null);
-  const [count, setCount] = useState(6); // for fetching 10 characters
+  const [scoreReset, setScoreReset] = useState(false);
+  const [count, setCount] = useState(6);
+  const [level, setLevel] = useState(1);
+
   const TARGET_SCORE = count - 3;
-  const [level, setLevel] = useState(1); // NEW: level tracker
+
+  const characters = useCharactersStore((state) => state.characters);
+  const fetchCharacters = useCharactersStore((state) => state.fetchCharacters);
+  const loading = useCharactersStore((state) => state.loading);
+  const error = useCharactersStore((state) => state.error);
+
+  // Fetch characters on mount and when count changes
+  useEffect(() => {
+    fetchCharacters(count);
+  }, [count, fetchCharacters]);
 
   useEffect(() => {
     if (score === TARGET_SCORE) {
@@ -73,65 +79,34 @@ export default function Memory() {
     }
   }, [score]);
 
-  const fetchCharacters = async (num = 10) => {
-    setLoading(true);
-    setError(null);
-    setSelectedCharacter(null);
-
-    try {
-      // Create an array of promises for 10 characters
-      const requests = Array(num)
-        .fill()
-        .map(() =>
-          axios.get("https://api.jikan.moe/v4/random/characters", {
-            headers: { Accept: "application/json" },
-          })
-        );
-
-      // Execute all requests
-      const responses = await Promise.all(requests);
-      const characterData = responses.map((res) => res.data.data);
-
-      setCharacters(characterData);
-    } catch (err) {
-      setError("Failed to fetch characters. Please try again.");
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchCharacters(count);
-  }, []);
-
   const handleClick = (id) => {
     if (showCongrats) return;
 
-    console.log("Clicked ID:", id);
-
     const clickedImage = characters.find((img) => img.mal_id === id);
-    console.log("Clicked Image:", clickedImage);
     if (!clickedImage) return;
 
     if (!clickedImage.isClicked) {
       const updatedCharacters = characters.map((img) =>
         img.mal_id === id ? { ...img, isClicked: true } : img
       );
+      useCharactersStore.setState({
+        characters: shuffleArray(updatedCharacters),
+      });
       setScore((prev) => prev + 1);
-      setCharacters(shuffleArray(updatedCharacters));
       setScoreReset(false);
     } else {
-      // Reset
+      // Game over
       setBestScore(Math.max(score, bestScore));
       setScore(0);
       setScoreReset(true);
-      setShowFail(true); // show failure UI
+      setShowFail(true);
       const resetCharacters = characters.map((img) => ({
         ...img,
         isClicked: false,
       }));
-      setCharacters(shuffleArray(resetCharacters));
+      useCharactersStore.setState({
+        characters: shuffleArray(resetCharacters),
+      });
     }
   };
 
@@ -140,16 +115,12 @@ export default function Memory() {
     setScore(0);
     setScoreReset(false);
     setShowCongrats(false);
-    setCharacters(
-      shuffleArray(initialImages.map((img) => ({ ...img, isClicked: false })))
-    );
+    setShowFail(false);
+    fetchCharacters(count); // 🔥 Re-fetch fresh characters from backend
   };
-
   const handleNextGame = () => {
-    const newCount = count + 1;
     setLevel((prev) => prev + 1);
-    setCount(newCount);
-    fetchCharacters(newCount);
+    setCount(count + 1);
     setBestScore(Math.max(score, bestScore));
     setScore(0);
     setScoreReset(false);
@@ -222,7 +193,9 @@ export default function Memory() {
                       ...img,
                       isClicked: false,
                     }));
-                    setCharacters(shuffleArray(resetCharacters));
+                    useCharactersStore.setState({
+                      characters: shuffleArray(resetCharacters),
+                    });
                   }}
                   className="bg-red-400 text-white px-6 py-2 rounded-full font-bold hover:bg-red-300 transition"
                 >
