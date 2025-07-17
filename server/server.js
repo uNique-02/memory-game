@@ -7,8 +7,8 @@ import path from "path";
 import { fileURLToPath } from "url";
 
 // Fix __dirname in ES module context
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+// const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.resolve();
 
 dotenv.config();
 
@@ -36,16 +36,26 @@ app.get("/api/random-characters", async (req, res) => {
   }
 });
 
-// Production: serve frontend
-if (process.env.NODE_ENV === "production") {
-  const frontendDistPath = path.join(__dirname, "..", "frontend", "dist");
+const distPath = path.join(__dirname, "/client/dist");
+console.log("🧪 Serving static files from:", distPath);
 
-  app.use(express.static(frontendDistPath));
+app.use(express.static(path.join(__dirname, "/client/dist")));
 
-  app.get("/{*any}", (req, res) => {
-    res.sendFile(path.join(frontendDistPath, "index.html"));
-  });
-}
+app.get("/{*any}", (req, res) => {
+  // res.sendFile(path.join(frontendDistPath, "index.html"));
+  res.sendFile(path.join(__dirname, "client", "dist", "index.html"));
+});
+
+// // Production: serve frontend
+// if (process.env.NODE_ENV === "production") {
+//   const frontendDistPath = path.join(__dirname, "..", "frontend", "dist");
+
+//   app.use(express.static(frontendDistPath));
+
+//   app.get("/{*any}", (req, res) => {
+//     res.sendFile(path.join(frontendDistPath, "index.html"));
+//   });
+// }
 
 app.listen(PORT, () =>
   console.log(`🚀 Server running at http://localhost:${PORT}`)
