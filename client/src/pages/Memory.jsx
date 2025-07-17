@@ -42,7 +42,6 @@ const initialImages = [
   },
 ];
 
-// Utility: Shuffle array
 function shuffleArray(array) {
   const shuffled = [...array];
   for (let i = shuffled.length - 1; i > 0; i--) {
@@ -68,7 +67,6 @@ export default function Memory() {
   const loading = useCharactersStore((state) => state.loading);
   const error = useCharactersStore((state) => state.error);
 
-  // Fetch characters on mount and when count changes
   useEffect(() => {
     fetchCharacters(count);
   }, [count, fetchCharacters]);
@@ -95,7 +93,6 @@ export default function Memory() {
       setScore((prev) => prev + 1);
       setScoreReset(false);
     } else {
-      // Game over
       setBestScore(Math.max(score, bestScore));
       setScore(0);
       setScoreReset(true);
@@ -116,8 +113,9 @@ export default function Memory() {
     setScoreReset(false);
     setShowCongrats(false);
     setShowFail(false);
-    fetchCharacters(count); // 🔥 Re-fetch fresh characters from backend
+    fetchCharacters(count);
   };
+
   const handleNextGame = () => {
     setLevel((prev) => prev + 1);
     setCount(count + 1);
@@ -142,21 +140,17 @@ export default function Memory() {
         <div className="relative min-h-screen bg-gradient-to-b from-green-900 to-green-700 text-white p-4 overflow-hidden">
           <Toaster position="top-center" />
 
-          <div className="absolute top-4 left-6 text-left">
-            <p className="text-blue-300 font-bold text-lg">Level: {level}</p>
-          </div>
-
           {showCongrats && (
             <>
               <Confetti width={window.innerWidth} height={window.innerHeight} />
               <div className="absolute inset-0 bg-black bg-opacity-80 flex flex-col items-center justify-center z-50">
-                <h2 className="text-4xl md:text-5xl font-extrabold text-yellow-300 mb-6 animate-pulse">
+                <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-yellow-300 mb-6 animate-pulse text-center">
                   🎉 Congratulations! 🎉
                 </h2>
-                <p className="text-lg text-white mb-4">
+                <p className="text-lg text-white mb-4 text-center">
                   You reached the target score of {TARGET_SCORE}!
                 </p>
-                <div className="flex gap-4 mt-4">
+                <div className="flex gap-4 mt-4 flex-wrap justify-center">
                   <button
                     onClick={handlePlayAgain}
                     className="bg-yellow-400 text-green-900 px-6 py-2 rounded-full font-bold hover:bg-yellow-300 transition"
@@ -176,13 +170,13 @@ export default function Memory() {
 
           {showFail && (
             <div className="absolute inset-0 bg-black bg-opacity-80 flex flex-col items-center justify-center z-50">
-              <h2 className="text-4xl md:text-5xl font-extrabold text-red-400 mb-6 animate-pulse">
+              <h2 className="text-4xl md:text-5xl font-extrabold text-red-400 mb-6 animate-pulse text-center">
                 ❌ Game Over ❌
               </h2>
-              <p className="text-lg text-white mb-4">
+              <p className="text-lg text-white mb-4 text-center">
                 You clicked a character twice. Try again!
               </p>
-              <div className="flex gap-4 mt-4">
+              <div className="flex gap-4 mt-4 flex-wrap justify-center">
                 <button
                   onClick={() => {
                     setBestScore(Math.max(score, bestScore));
@@ -205,15 +199,20 @@ export default function Memory() {
             </div>
           )}
 
-          <header className="text-center mb-6">
-            <h1 className="text-5xl font-extrabold text-yellow-300 drop-shadow-md">
-              Trip Down the Memory Lane
-            </h1>
-            <p className="text-orange-300 mt-2">
-              Get points by clicking on an image but don't click on any more
-              than once!
-            </p>
-            <div className="absolute top-4 right-6 text-right">
+          {/* Header */}
+          <header className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6 text-center md:text-left">
+            <div className="flex-1">
+              <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-yellow-300 drop-shadow-md break-words">
+                Trip Down the Memory Lane
+              </h1>
+              <p className="text-orange-300 mt-1 text-sm sm:text-base">
+                Get points by clicking on an image but don't click on any more
+                than once!
+              </p>
+            </div>
+
+            <div className="flex flex-col items-end text-sm sm:text-base text-right">
+              <p className="text-blue-300 font-bold">Level: {level}</p>
               <p className="text-green-400 font-bold">
                 Target Score: {TARGET_SCORE}
               </p>
@@ -228,7 +227,8 @@ export default function Memory() {
             </div>
           </header>
 
-          <main className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6 justify-center">
+          {/* Game Grid */}
+          <main className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 sm:gap-6 justify-center">
             {characters.map((char) => (
               <div
                 key={char.mal_id}
@@ -238,9 +238,9 @@ export default function Memory() {
                 <img
                   src={char.images.jpg.image_url}
                   alt={char.name}
-                  className="rounded-md w-full h-48 object-cover"
+                  className="rounded-md w-full h-40 sm:h-48 object-cover"
                 />
-                <p className="text-center font-semibold text-white mt-2 drop-shadow-md">
+                <p className="text-center font-semibold text-white mt-2 drop-shadow-md text-sm sm:text-base">
                   {char.name}
                 </p>
               </div>
