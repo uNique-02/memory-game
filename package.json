@@ -7,7 +7,7 @@
     "zustand": "^5.0.6"
   },
   "devDependencies": {
-    "nodemon": "^3.1.10"
+    "nodemon": "^3.1.14"
   },
   "name": "memory-lane",
   "version": "1.0.0",
