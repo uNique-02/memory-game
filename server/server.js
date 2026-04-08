@@ -65,7 +65,7 @@ app.get("/api/random-characters", async (req, res) => {
           success = true;
 
           // ✅ safer delay (IMPORTANT)
-          await delay(800);
+          await delay(1000);
         } catch (err) {
           if (err.response?.status === 429) {
             console.log("⚠️ Rate limited, retrying...");
@@ -110,7 +110,7 @@ if (process.env.NODE_ENV === "production") {
 
   app.use(express.static(frontendDistPath));
 
-  app.get("*", (req, res) => {
+  app.get("/*", (req, res) => {
     res.sendFile(path.join(frontendDistPath, "index.html"));
   });
 }
